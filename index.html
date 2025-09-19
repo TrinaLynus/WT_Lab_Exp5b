@@ -2,86 +2,143 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>EMI Calculator</title>
+  <title>Cake Order Bill Calculator</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#f8fafc; padding:28px; }
-    .card { max-width:600px; margin:0 auto; background:white; padding:20px; border-radius:10px; box-shadow:0 6px 18px rgba(20,30,60,0.06); }
-    h2 { margin:0 0 12px 0; }
+    body { font-family: Arial, sans-serif; background:#f4f7fb; padding:24px; }
+    .card { background:white; max-width:720px; margin:0 auto; padding:20px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    h2 { margin-top:0; }
+    .row { display:flex; gap:12px; margin-bottom:12px; }
+    .row > div { flex:1; }
     label { display:block; margin-bottom:6px; font-weight:600; }
-    input[type="number"], select { width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:12px; }
-    .flex { display:flex; gap:12px; }
-    .flex > div { flex:1; }
-    button { padding:10px 14px; border-radius:8px; border:none; background:#0f62fe; color:white; cursor:pointer; }
-    #result { margin-top:16px; background:#f1f6ff; padding:12px; border-radius:8px; }
-    .line { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #e7eefc; }
+    input[type="number"], select, input[type="text"] { width:100%; padding:8px; border:1px solid #cfd8e3; border-radius:6px; }
+    .small { font-size:0.9rem; color:#555; }
+    button { padding:10px 16px; border:none; background:#2b7cff; color:white; border-radius:8px; cursor:pointer; }
+    button:active { transform:translateY(1px); }
+    #bill { margin-top:18px; background:#f7fbff; padding:12px; border-radius:8px; }
+    .line { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #e6ecf8; }
     .line:last-child { border-bottom:none; font-weight:700; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>Bank Loan EMI Calculator</h2>
-    <label for="principal">Loan Amount (P) — ₹</label>
-    <input id="principal" type="number" min="0" step="1000" value="500000">
+    <h2>Cake Order Bill Calculator</h2>
+    <p class="small">Fill order details and click <strong>Calculate Bill</strong>.</p>
 
-    <div class="flex">
+    <div class="row">
       <div>
-        <label for="annualRate">Annual Interest Rate (%)</label>
-        <input id="annualRate" type="number" min="0" step="0.01" value="8.5">
+        <label for="flavour">Cake Flavour</label>
+        <select id="flavour">
+          <option value="Vanilla" data-price="400">Vanilla (₹400/kg)</option>
+          <option value="Chocolate" data-price="450">Chocolate (₹450/kg)</option>
+          <option value="Red Velvet" data-price="520">Red Velvet (₹520/kg)</option>
+          <option value="Butterscotch" data-price="480">Butterscotch (₹480/kg)</option>
+        </select>
       </div>
       <div>
-        <label for="tenureYears">Tenure (years)</label>
-        <input id="tenureYears" type="number" min="0.5" step="0.5" value="5">
+        <label for="weight">Weight (kg)</label>
+        <input id="weight" type="number" min="0.5" step="0.1" value="1">
+      </div>
+      <div>
+        <label for="qty">Quantity</label>
+        <input id="qty" type="number" min="1" step="1" value="1">
       </div>
     </div>
 
-    <label for="down">Down payment (optional)</label>
-    <input id="down" type="number" min="0" step="1000" value="0">
-
-    <div style="margin-top:6px;">
-      <button id="calcEMI">Calculate EMI</button>
+    <div class="row">
+      <div>
+        <label for="customText">Custom message (₹50)</label>
+        <input id="customText" type="text" placeholder="Happy Birthday...">
+      </div>
+      <div>
+        <label for="candles">Candles</label>
+        <select id="candles">
+          <option value="0" data-price="0">No</option>
+          <option value="1" data-price="20">Yes (₹20)</option>
+        </select>
+      </div>
+      <div>
+        <label for="delivery">Home Delivery</label>
+        <select id="delivery">
+          <option value="0" data-price="0">Pickup</option>
+          <option value="1" data-price="60">Delivery (₹60)</option>
+        </select>
+      </div>
     </div>
 
-    <div id="result" aria-live="polite">
-      <div class="line"><span>EMI</span><span id="emi">₹0.00</span></div>
-      <div class="line"><span>Total Payment (EMI × months)</span><span id="totalPay">₹0.00</span></div>
-      <div class="line"><span>Total Interest Payable</span><span id="totalInt">₹0.00</span></div>
+    <div class="row">
+      <div>
+        <label for="discount">Discount (%)</label>
+        <input id="discount" type="number" min="0" max="100" value="0">
+      </div>
+      <div>
+        <label for="gst">GST (%)</label>
+        <input id="gst" type="number" min="0" max="100" value="5">
+      </div>
+      <div style="align-self:end">
+        <button id="calcBtn">Calculate Bill</button>
+      </div>
+    </div>
+
+    <div id="bill" aria-live="polite">
+      <div class="line"><span>Subtotal</span><span id="subtotal">₹0.00</span></div>
+      <div class="line"><span>Add-ons</span><span id="addons">₹0.00</span></div>
+      <div class="line"><span>Discount</span><span id="discountAmt">-₹0.00</span></div>
+      <div class="line"><span>GST</span><span id="gstAmt">₹0.00</span></div>
+      <div class="line"><span style="color:#333">Total Payable</span><span id="total">₹0.00</span></div>
     </div>
   </div>
 
   <script>
-    function fmt(x){ return "₹" + x.toFixed(2); }
+    function parsePrice(el, fallback=0){
+      // read data-price or numeric value
+      if(!el) return fallback;
+      const dp = el.selectedOptions && el.selectedOptions[0] ? el.selectedOptions[0].dataset.price : null;
+      if(dp !== null && dp !== undefined) return parseFloat(dp) || fallback;
+      return parseFloat(el.value) || fallback;
+    }
 
-    document.getElementById('calcEMI').addEventListener('click', function(){
-      let P = parseFloat(document.getElementById('principal').value) || 0;
-      const down = parseFloat(document.getElementById('down').value) || 0;
-      P = Math.max(0, P - down); // principal after down payment
+    function formatINR(x){ return "₹" + x.toFixed(2); }
 
-      const annual = parseFloat(document.getElementById('annualRate').value) || 0;
-      const years = parseFloat(document.getElementById('tenureYears').value) || 0;
+    document.getElementById('calcBtn').addEventListener('click', function(){
+      const flavourEl = document.getElementById('flavour');
+      const basePerKg = parsePrice(flavourEl, 0);
 
-      const N = Math.round(years * 12); // months
-      if(N <= 0){
-        alert('Enter valid tenure (years).');
+      const weight = parseFloat(document.getElementById('weight').value) || 0;
+      const qty = parseInt(document.getElementById('qty').value) || 1;
+
+      // Base price
+      const subtotal = basePerKg * weight * qty;
+
+      // Add-ons
+      let addons = 0;
+      const customText = document.getElementById('customText').value.trim();
+      if(customText.length > 0) addons += 50; // fixed charge
+      addons += parsePrice(document.getElementById('candles'));
+      addons += parsePrice(document.getElementById('delivery'));
+
+      // Discount
+      const discountPercent = parseFloat(document.getElementById('discount').value) || 0;
+      const discountAmt = ((subtotal + addons) * Math.min(Math.max(discountPercent,0),100)) / 100;
+
+      // GST
+      const gstPercent = parseFloat(document.getElementById('gst').value) || 0;
+      const taxable = subtotal + addons - discountAmt;
+      const gstAmt = (taxable * gstPercent) / 100;
+
+      const total = taxable + gstAmt;
+
+      // Basic validation
+      if(weight <= 0 || qty <= 0){
+        alert('Enter valid weight and quantity.');
         return;
       }
 
-      // Monthly rate R = annual/12/100
-      const R = annual / 12 / 100;
-
-      // EMI formula: EMI = [P * R * (1+R)^N] / [(1+R)^N - 1]
-      let emi = 0;
-      if(R === 0){
-        emi = P / N;
-      } else {
-        const pow = Math.pow(1 + R, N);
-        emi = (P * R * pow) / (pow - 1);
-      }
-      const totalPay = emi * N;
-      const totalInterest = totalPay - P;
-
-      document.getElementById('emi').textContent = fmt(emi);
-      document.getElementById('totalPay').textContent = fmt(totalPay);
-      document.getElementById('totalInt').textContent = fmt(totalInterest);
+      // Display
+      document.getElementById('subtotal').textContent = formatINR(subtotal);
+      document.getElementById('addons').textContent = formatINR(addons);
+      document.getElementById('discountAmt').textContent = "-" + formatINR(discountAmt);
+      document.getElementById('gstAmt').textContent = formatINR(gstAmt);
+      document.getElementById('total').textContent = formatINR(total);
     });
   </script>
 </body>
