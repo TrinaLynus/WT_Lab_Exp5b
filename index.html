@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>EMI Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f8fafc; padding:28px; }
+    .card { max-width:600px; margin:0 auto; background:white; padding:20px; border-radius:10px; box-shadow:0 6px 18px rgba(20,30,60,0.06); }
+    h2 { margin:0 0 12px 0; }
+    label { display:block; margin-bottom:6px; font-weight:600; }
+    input[type="number"], select { width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:12px; }
+    .flex { display:flex; gap:12px; }
+    .flex > div { flex:1; }
+    button { padding:10px 14px; border-radius:8px; border:none; background:#0f62fe; color:white; cursor:pointer; }
+    #result { margin-top:16px; background:#f1f6ff; padding:12px; border-radius:8px; }
+    .line { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed #e7eefc; }
+    .line:last-child { border-bottom:none; font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Bank Loan EMI Calculator</h2>
+    <label for="principal">Loan Amount (P) — ₹</label>
+    <input id="principal" type="number" min="0" step="1000" value="500000">
+
+    <div class="flex">
+      <div>
+        <label for="annualRate">Annual Interest Rate (%)</label>
+        <input id="annualRate" type="number" min="0" step="0.01" value="8.5">
+      </div>
+      <div>
+        <label for="tenureYears">Tenure (years)</label>
+        <input id="tenureYears" type="number" min="0.5" step="0.5" value="5">
+      </div>
+    </div>
+
+    <label for="down">Down payment (optional)</label>
+    <input id="down" type="number" min="0" step="1000" value="0">
+
+    <div style="margin-top:6px;">
+      <button id="calcEMI">Calculate EMI</button>
+    </div>
+
+    <div id="result" aria-live="polite">
+      <div class="line"><span>EMI</span><span id="emi">₹0.00</span></div>
+      <div class="line"><span>Total Payment (EMI × months)</span><span id="totalPay">₹0.00</span></div>
+      <div class="line"><span>Total Interest Payable</span><span id="totalInt">₹0.00</span></div>
+    </div>
+  </div>
+
+  <script>
+    function fmt(x){ return "₹" + x.toFixed(2); }
+
+    document.getElementById('calcEMI').addEventListener('click', function(){
+      let P = parseFloat(document.getElementById('principal').value) || 0;
+      const down = parseFloat(document.getElementById('down').value) || 0;
+      P = Math.max(0, P - down); // principal after down payment
+
+      const annual = parseFloat(document.getElementById('annualRate').value) || 0;
+      const years = parseFloat(document.getElementById('tenureYears').value) || 0;
+
+      const N = Math.round(years * 12); // months
+      if(N <= 0){
+        alert('Enter valid tenure (years).');
+        return;
+      }
+
+      // Monthly rate R = annual/12/100
+      const R = annual / 12 / 100;
+
+      // EMI formula: EMI = [P * R * (1+R)^N] / [(1+R)^N - 1]
+      let emi = 0;
+      if(R === 0){
+        emi = P / N;
+      } else {
+        const pow = Math.pow(1 + R, N);
+        emi = (P * R * pow) / (pow - 1);
+      }
+      const totalPay = emi * N;
+      const totalInterest = totalPay - P;
+
+      document.getElementById('emi').textContent = fmt(emi);
+      document.getElementById('totalPay').textContent = fmt(totalPay);
+      document.getElementById('totalInt').textContent = fmt(totalInterest);
+    });
+  </script>
+</body>
+</html>
